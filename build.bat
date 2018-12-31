@@ -17,11 +17,11 @@ ECHO.
 ECHO NASM UEFI Build Script
 ECHO.
 
-IF NOT "%VSCMD_ARG_HOST_ARCH%" == "x64" GOTO :ErrorX64
-IF NOT "%VSCMD_ARG_TGT_ARCH%" == "x64" GOTO :ErrorX64
+IF "%VSCMD_ARG_HOST_ARCH%" NEQ "x64" GOTO :ErrorX64
+IF "%VSCMD_ARG_TGT_ARCH%" NEQ "x64" GOTO :ErrorX64
 
 NET SESSION > NUL 2>&1
-IF NOT %ERRORLEVEL% == 0 GOTO :ErrorAdmin
+IF %ERRORLEVEL% NEQ 0 GOTO :ErrorAdmin
 
 ECHO   1) Build Virtual Hard Disk
 ECHO   2) Mount / Unmount VHD
@@ -58,6 +58,8 @@ GOTO :EOF
 
 :BuildVHD
 IF EXIST %MNT% CALL :MountVHD
+IF %EXITCODE% NEQ 0 GOTO :EOF
+
 IF EXIST %VHD% DEL %VHD%
 
 ECHO create vdisk file=%VHD% maximum=300 > build.tmp
@@ -107,7 +109,7 @@ DISKPART /S build.tmp > build.err
 IF %ERRORLEVEL% NEQ 0 (
     ECHO Error: The diskpart command failed with the following output
     ECHO.
-    ECHo ------
+    ECHO ------
     
     TYPE build.err
     DEL build.err
@@ -123,17 +125,20 @@ DEL build.tmp
 GOTO :EOF
 
 :BuildUEFI
-%NASM% -f win64 %ASM% -o %OBJ% > build.err
+%NASM% -f win64 %ASM% -o %OBJ% > NUL 2> build.err
 
 IF %ERRORLEVEL% NEQ 0 (
     ECHO Error: The nasm command failed with the following output
     ECHO.
-    ECHo ------
+    ECHO ------
+    ECHO.
     
     TYPE build.err
     DEL build.err
     
     SET EXITCODE=1
+    
+    GOTO :EOF
 )
 
 DEL build.err
@@ -143,12 +148,15 @@ link /subsystem:EFI_APPLICATION /entry:_start /out:%EFI% %OBJ% > build.err
 IF %ERRORLEVEL% NEQ 0 (
     ECHO Error: The link command failed with the following output
     ECHO.
-    ECHo ------
+    ECHO ------
+    ECHO.
     
     TYPE build.err
     DEL build.err
     
     SET EXITCODE=1
+    
+    GOTO :EOF
 )
 
 DEL build.err
@@ -158,10 +166,16 @@ ECHO EFI Success!
 GOTO :EOF
 
 :Boot
-IF NOT EXIST %VHD% CALL :BuildVHD
-IF NOT EXIST %MNT% CALL :MountVHD
+IF NOT EXIST %VHD% CALL :BuildVHD && ECHO.
+IF %EXITCODE% NEQ 0 GOTO :EOF
+
+IF NOT EXIST %MNT% CALL :MountVHD && ECHO.
+IF %EXITCODE% NEQ 0 GOTO :EOF
 
 CALL :BuildUEFI
+IF %EXITCODE% NEQ 0 GOTO :EOF
+
+ECHO.
 
 IF NOT EXIST %MNT%EFI MKDIR %MNT%EFI
 IF NOT EXIST %MNT%EFI\BOOT MKDIR %MNT%EFI\BOOT
@@ -171,17 +185,21 @@ COPY /Y %EFI% %MNT%EFI\BOOT\BOOTX64.EFI > build.err
 IF %ERRORLEVEL% NEQ 0 (
     ECHO Error: The copy command failed with the following output
     ECHO.
-    ECHo ------
+    ECHO ------
+    ECHO.
     
     TYPE build.err
     DEL build.err
     
     SET EXITCODE=1
+    
+    GOTO :EOF
 )
 
 DEL build.err
 
 CALL :MountVHD
+IF %EXITCODE% NEQ 0 GOTO :EOF
 
 %QEMU% -cpu qemu64 -bios %OVMF% -drive file=%VHD%,format=raw
 
