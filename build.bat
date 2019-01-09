@@ -143,7 +143,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 DEL build.err
 
-link /subsystem:EFI_APPLICATION /entry:_start /out:%EFI% %OBJ% > build.err
+link /subsystem:EFI_APPLICATION /entry:start /out:%EFI% %OBJ% > build.err
 
 IF %ERRORLEVEL% NEQ 0 (
     ECHO Error: The link command failed with the following output
