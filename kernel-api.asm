@@ -15,6 +15,26 @@
 ; we use the same calling conventions as UEFI
 ; see http://www.uefi.org/sites/default/files/resources/UEFI Spec 2_7_A Sept 6.pdf#G6.1000069
 
+apiVerifySignature:
+    ; get the signature for the loaded EFI_SYSTEM_TABLE
+    mov rcx, [ptrSystemTable]
+    mov rcx, [rcx + EFI_SYSTEM_TABLE.Hdr + EFI_TABLE_HEADER.Signature]
+    
+    ; get the signature defined in the UEFI spec
+    ; see http://www.uefi.org/sites/default/files/resources/UEFI Spec 2_7_A Sept 6.pdf#G8.1001773
+    mov rdx, EFI_SYSTEM_TABLE_SIGNATURE
+    
+    ; set our error code
+    mov rax, EFI_LOAD_ERROR
+    
+    ; compare the signatures and return the error code when they don't match
+	cmp rdx, rcx
+	jne error
+	
+	mov rax, EFI_SUCCESS
+	
+	ret
+
 apiOutputHeader:
     ; clear the screen
     call efiClearScreen
@@ -39,22 +59,34 @@ apiOutputHeader:
     
     ret
 
-apiVerifySignature:
-    ; get the signature for the loaded EFI_SYSTEM_TABLE
-    mov rcx, [ptrSystemTable]
-    mov rcx, [rcx + EFI_SYSTEM_TABLE.Hdr + EFI_TABLE_HEADER.Signature]
+apiGetFrameBuffer:
+    ; locate the first EFI_GRAPHICS_OUTPUT_PROTOCOL
+    ; and allocate a frame buffer
+    call efiLocateProtocol
     
-    ; get the signature defined in the UEFI spec
-    ; see http://www.uefi.org/sites/default/files/resources/UEFI Spec 2_7_A Sept 6.pdf#G8.1001773
-    mov rdx, EFI_SYSTEM_TABLE_SIGNATURE
+    ; get the base address of the frame buffer 
+    mov rcx, [ptrInterface]
+    mov rcx, [rcx + EFI_GRAPHICS_OUTPUT_PROTOCOL.Mode]
+    mov rcx, [rcx + EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE.FrameBufferBase]
     
-    ; set our error code
-    mov rax, EFI_LOAD_ERROR
+    mov [ptrFrameBuffer], rcx
     
-    ; compare the signatures and return the error code when they don't match
-	cmp rdx, rcx
-	jne error
-	
-	mov rax, EFI_SUCCESS
-	
-	ret
+    ret
+
+apiExitUEFI:
+    call efiGetMemoryMap
+    call efiExitBootServices
+    
+    ret
+
+apiLoadKernel:
+    ; verify we have reached this point
+    ; by resetting the machine
+    ; mov rax, [ptrSystemTable]
+    ; mov rax, [rax + EFI_SYSTEM_TABLE.RuntimeServices]
+    ; call [rax + EFI_RUNTIME_SERVICES.ResetSystem]
+    
+    ; TODO: write a color to the framebuffer
+    ; mov byte [ptrFrameBuffer], 123
+    
+    ret

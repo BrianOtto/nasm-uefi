@@ -29,6 +29,9 @@ global start
 %include "kernel-api.asm"
 
 start:
+    ; save the location of UEFI
+    mov [ptrUEFI], rsp
+    
     ; reserve space for 4 arguments
     sub rsp, 4 * 8
     
@@ -49,22 +52,41 @@ start:
     ; output the OS and Firmware versions
     call apiOutputHeader
     
-    ; TODO: boot a kernel
+    ; locate a graphics device and allocate a frame buffer
+    call apiGetFrameBuffer
     
-    ; loop forever so we can see the header before the UEFI application exits
-    jmp funLoopForever
+    ; get a memory map and exit UEFI boot services
+    call apiExitUEFI
+    
+    ; load our kernel
+    call apiLoadKernel
     
     add rsp, 4 * 8
-    mov eax, EFI_SUCCESS
+    mov rax, EFI_SUCCESS
     ret
 
 error:
-    ; all functions are expected to store their error code in rax
-    ; and so a "mov eax" is not needed
-    add rsp, 4 * 8
+    ; move to the location of UEFI and return
+    mov rsp, [ptrUEFI]
     ret
+
+errorCode:
+    ; save our error code
+    push rax
     
-    ; TODO: get this to return without hanging
+    ; display the message
+    mov rcx, strErrorCode
+    call efiOutputString
+    
+    ; grab our error code and write it
+    ; see the UEFI definitions in kernel-efi.asm
+    mov rcx, [rsp]
+    call funIntegerToAscii
+    
+    ; restore the error code
+    pop rax
+    
+    jmp error
 
 codesize equ $ - $$
 
@@ -74,13 +96,31 @@ section .reloc
 ; contains the data being stored
 section .data
     ; UEFI requires we use Unicode strings
-    strHeader      db __utf16__ `Hacker Pulp OS v0.1\r\nRunning on \0`
-    strHeaderV     db __utf16__ ` v\0`
+    strHeader               db   __utf16__ `Hacker Pulp OS v0.1\r\nRunning on \0`
+    strHeaderV              db   __utf16__ ` v\0`
+    strErrorCode            db   __utf16__ `\r\n\nError Code #\0`
+    strDebugText            db   __utf16__ `\r\n\nDebug: \0`
+    
+    ; stores the location of UEFI
+    ptrUEFI                 dq   0
     
     ; stores the EFI_HANDLE
-    hndImageHandle dq 0
+    hndImageHandle          dq   0
     
     ; stores the EFI_SYSTEM_TABLE
-    ptrSystemTable dq 0
+    ptrSystemTable          dq   0
     
+    ; stores the EFI_GRAPHICS_OUTPUT_PROTOCOL
+    ptrInterface            dq   0
+    
+    ; stores the memory map data
+    intMemoryMapSize        dq   EFI_MEMORY_DESCRIPTOR_size * 1024
+    bufMemoryMap            resb EFI_MEMORY_DESCRIPTOR_size * 1024
+    ptrMemoryMapKey         dq   0
+    ptrMemoryMapDescSize    dq   0
+    ptrMemoryMapDescVersion dq   0
+    
+    ; stores the frame buffer base
+    ptrFrameBuffer          dq   0
+
 datasize equ $ - $$

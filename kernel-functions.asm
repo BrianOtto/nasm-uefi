@@ -36,7 +36,7 @@ funIntegerToAsciiDivide:
     mov rdx, 0
     
     ; divide rax by 10
-    ; rsi works on rax
+    ; idiv works on rax
     ; e.g. 123 / 10 = 12.3
     mov rsi, 10
     idiv rsi
