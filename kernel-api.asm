@@ -28,12 +28,12 @@ apiVerifySignature:
     mov rax, EFI_LOAD_ERROR
     
     ; compare the signatures and return the error code when they don't match
-	cmp rdx, rcx
-	jne error
-	
-	mov rax, EFI_SUCCESS
-	
-	ret
+    cmp rdx, rcx
+    jne error
+    
+    mov rax, EFI_SUCCESS
+    
+    ret
 
 apiOutputHeader:
     ; clear the screen
