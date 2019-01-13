@@ -1,4 +1,4 @@
-# A UEFI Application Built in NASM
+# A UEFI Boot Loader Built in NASM
 
 ![Build Script](build.png?raw=true "Build Script")
 
