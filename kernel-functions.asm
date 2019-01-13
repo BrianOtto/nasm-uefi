@@ -82,3 +82,19 @@ funIntegerToAsciiOutput:
 
 funLoopForever:
     jmp funLoopForever
+
+funDrawLine:
+    ; draw a single pixel
+    mov [rcx + rdx], byte 0x00     ; blue
+    mov [rcx + rdx + 1], byte 0x00 ; green
+    mov [rcx + rdx + 2], byte 0xFF ; red
+    mov [rcx + rdx + 3], byte 0xFF ; alpha
+    
+    ; skip to the next pixel
+    add rdx, 4
+    
+    ; stop drawing when we've reached rdx
+    cmp rdx, r8
+    jne funDrawLine
+    
+    ret

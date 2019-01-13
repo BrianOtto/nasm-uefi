@@ -86,7 +86,16 @@ apiLoadKernel:
     ; mov rax, [rax + EFI_SYSTEM_TABLE.RuntimeServices]
     ; call [rax + EFI_RUNTIME_SERVICES.ResetSystem]
     
-    ; TODO: write a color to the framebuffer
-    ; mov byte [ptrFrameBuffer], 123
+    ; set the 1st argument to our frame buffer
+    mov rcx, [ptrFrameBuffer]
+    
+    ; set the 2nd argument to our start position
+    mov rdx, 0
+    
+    ; set the 3rd argument to our end position
+    ; this should be in multiples of 4
+    mov r8, 1024 * 100
+    
+    call funDrawLine
     
     ret
