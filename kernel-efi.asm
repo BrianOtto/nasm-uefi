@@ -87,9 +87,9 @@ endstruc
 struc EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL
     .Reset             POINTER
     .OutputString      POINTER
-    .TestString	       POINTER
-    .QueryMode	       POINTER
-    .SetMode	       POINTER
+    .TestString        POINTER
+    .QueryMode         POINTER
+    .SetMode           POINTER
     .SetAttribute      POINTER
     .ClearScreen       POINTER
     .SetCursorPosition POINTER
@@ -169,15 +169,15 @@ endstruc
 struc EFI_GRAPHICS_OUTPUT_PROTOCOL
     .QueryMode POINTER
     .SetMode   POINTER
-    .Blt	   POINTER
-    .Mode	   POINTER
+    .Blt       POINTER
+    .Mode      POINTER
 endstruc
 
 ; see Errata A page 494
 struc EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE
     .MaxMode         UINT32
     .Mode            UINT32
-    .Info	         POINTER
+    .Info            POINTER
     .SizeOfInfo      UINTN
     .FrameBufferBase UINT64
     .FrameBufferSize UINTN
@@ -216,7 +216,7 @@ efiOutputString:
     
     ; display any errors
     cmp rax, EFI_SUCCESS
-	jne errorCode
+    jne errorCode
     
     ret
 
@@ -235,7 +235,7 @@ efiClearScreen:
     
     ; display any errors
     cmp rax, EFI_SUCCESS
-	jne errorCode
+    jne errorCode
     
     ret
 
@@ -264,7 +264,7 @@ efiLocateProtocol:
     
     ; display any errors
     cmp rax, EFI_SUCCESS
-	jne errorCode
+    jne errorCode
     
     ret
 
@@ -307,7 +307,7 @@ efiGetMemoryMap:
     
     ; display any errors
     cmp rax, EFI_SUCCESS
-	jne errorCode
+    jne errorCode
     
     ; return to the previous stack location
     mov rsp, rbx
@@ -335,6 +335,6 @@ efiExitBootServices:
     
     ; display any errors
     cmp rax, EFI_SUCCESS
-	jne errorCode
-	
-	ret
+    jne errorCode
+    
+    ret
