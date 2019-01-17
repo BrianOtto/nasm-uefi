@@ -30,6 +30,11 @@
         padding: 10px;
     }
     
+    .buttons {
+        padding: 10px;
+        text-align: center;
+    }
+    
     body {
         font-family: verdana;
     }
@@ -43,11 +48,16 @@
     
     <table cellpadding="0" cellspacing="0" id="app">
     <tr>
-        <td id="col">
+        <td align="center" id="col">
             <textarea id="glyph"></textarea>
+            
+            <div class="buttons">
+                <input type="button" id="saveGlyph" value="Save">
+                <input type="button" id="loadGlyph" value="Load">
+            </div>
         </td>
         
-        <td id="col">
+        <td align="center" id="col">
             <table cellpadding="0" cellspacing="0" id="table">
                 <tr>
                     <td data-value="255" class="pixel"></td>
@@ -321,46 +331,55 @@
                     <td data-value="255" class="pixel"></td>
                 </tr>
             </table>
+            
+            <div class="buttons">
+                <select>
+                    <option value="a">Glyph A</option>
+                </select>
+                
+                <input type="button" id="loadFromFont" value="Load">
+            </div>
         </td>
         
-        <td>
+        <td align="center">
             <table cellpadding="5" cellspacing="0">
                 <tr>
                     <td align="center"><strong>Shade</strong></td>
-                    <td align="center"><strong>Shrink</strong></td>
+                    <td align="center"><strong>Size</strong></td>
                     <td align="center"><strong>Subpixel</strong></td>
                     <td align="center"><strong>Grid</strong></td>
                 </tr>
                 <tr>
                     <td valign="top">
-                        <input type="radio" name="shade" value="1.0" checked>&nbsp;100%<br>
-                        <input type="radio" name="shade" value="0.9">&nbsp;90%<br>
-                        <input type="radio" name="shade" value="0.8">&nbsp;80%<br>
-                        <input type="radio" name="shade" value="0.7">&nbsp;70%<br>
-                        <input type="radio" name="shade" value="0.6">&nbsp;60%<br>
-                        <input type="radio" name="shade" value="0.5">&nbsp;50%<br>
-                        <input type="radio" name="shade" value="0.4">&nbsp;40%<br>
-                        <input type="radio" name="shade" value="0.3">&nbsp;30%<br>
-                        <input type="radio" name="shade" value="0.2">&nbsp;20%<br>
-                        <input type="radio" name="shade" value="0.1">&nbsp;10%
+                        <input type="radio" name="shade" value="1.00" checked>&nbsp;100%<br>
+                        <input type="radio" name="shade" value="0.95">&nbsp;95%<br>
+                        <input type="radio" name="shade" value="0.90">&nbsp;90%<br>
+                        <input type="radio" name="shade" value="0.85">&nbsp;85%<br>
+                        <input type="radio" name="shade" value="0.80">&nbsp;80%<br>
+                        <input type="radio" name="shade" value="0.75">&nbsp;75%<br>
+                        <input type="radio" name="shade" value="0.70">&nbsp;70%<br>
+                        <input type="radio" name="shade" value="0.65">&nbsp;65%<br>
+                        <input type="radio" name="shade" value="0.60">&nbsp;60%<br>
+                        <input type="radio" name="shade" value="0.55">&nbsp;55%<br>
+                        <input type="radio" name="shade" value="0.50">&nbsp;50%<br>
+                        <input type="radio" name="shade" value="0.45">&nbsp;45%<br>
+                        <input type="radio" name="shade" value="0.40">&nbsp;40%<br>
+                        <input type="radio" name="shade" value="0.35">&nbsp;35%<br>
+                        <input type="radio" name="shade" value="0.30">&nbsp;30%<br>
+                        <input type="radio" name="shade" value="0.25">&nbsp;25%<br>
+                        <input type="radio" name="shade" value="0.20">&nbsp;20%<br>
+                        <input type="radio" name="shade" value="0.15">&nbsp;15%<br>
+                        <input type="radio" name="shade" value="0.10">&nbsp;10%
                     </td>
                     
                     <td valign="top">
-                        <input type="radio" name="shrink" class="shrink" value="80">&nbsp;8000%<br>
-                        <input type="radio" name="shrink" class="shrink" value="60">&nbsp;6000%<br>
-                        <input type="radio" name="shrink" class="shrink" value="40">&nbsp;4000%<br>
-                        <input type="radio" name="shrink" class="shrink" value="20">&nbsp;2000%<br>
-                        <input type="radio" name="shrink" class="shrink" value="10">&nbsp;1000%<br>
-                        <input type="radio" name="shrink" class="shrink" value="8">&nbsp;800%<br>
-                        <input type="radio" name="shrink" class="shrink" value="6">&nbsp;600%<br>
-                        <input type="radio" name="shrink" class="shrink" value="4">&nbsp;400%<br>
-                        <input type="radio" name="shrink" class="shrink" value="2">&nbsp;200%<br>
-                        <input type="radio" name="shrink" class="shrink" value="1" checked>&nbsp;100%
+                        <input type="radio" name="size" class="size" value="1" checked>&nbsp;Original<br>
+                        <input type="radio" name="size" class="size" value="100">&nbsp;16px<br>
                     </td>
                     
                     <td valign="top">
-                        <input type="radio" name="sp" class="sp" value="1" checked>&nbsp;On<br>
-                        <input type="radio" name="sp" class="sp" value="0">&nbsp;Off<br>
+                        <input type="radio" name="sp" class="sp" value="1">&nbsp;On<br>
+                        <input type="radio" name="sp" class="sp" value="0" checked>&nbsp;Off<br>
                         
                         <br>
                         
@@ -391,14 +410,18 @@
                 $(this).attr('data-value', 255)
             }
             
-            saveGlyph()
+            saveValue()
             drawGlyph()
         })
         
-        $('.shrink').on('click', function() {
-            var shrink = parseFloat($('input[name=shrink]:checked').val())
+        $('.size').on('click', function() {
+            var size = parseFloat($('input[name=size]:checked').val())
             
-            $('.pixel').css('padding', 10 / shrink)
+            $('.pixel').css('padding', 10 / size)
+            
+            if (size != 1) {
+                $('input[name=grid]').filter('[value=0]').prop('checked', true).click()
+            }
         })
         
         $('.grid').on('click', function() {
@@ -411,11 +434,7 @@
             }
         })
         
-        $('#glyph').on('change', function() {
-            drawGlyph()
-        })
-        
-        $('.sp, .spOrder').on('click', function() {
+        $('#loadGlyph, .sp, .spOrder').on('click', function() {
             drawGlyph()
         })
         
@@ -440,7 +459,7 @@
             return 255 - parseInt(255 * percentage)
         }
         
-        function saveGlyph() {
+        function saveValue() {
             $('#glyph').val('')
             
             $('.pixel').each(function() {
